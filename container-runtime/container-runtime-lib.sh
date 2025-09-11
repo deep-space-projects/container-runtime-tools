@@ -7,16 +7,7 @@
 set -euo pipefail
 
 container_runtime_build() {
-  if [[ -z "${CONTAINER_TOOLS:-}" ]]; then
-      echo "❌ ERROR: CONTAINER_TOOLS environment variable is not set"
-      echo ""
-      echo "This variable should be set in your Dockerfile:"
-      echo "  ENV CONTAINER_TOOLS=/opt/container-tools"
-      echo ""
-      return 1
-  fi
-
-  local script_path="${CONTAINER_TOOLS}/container-runtime.sh"
+  local script_path="./container-runtime.sh"
 
   if [[ ! -x "$script_path" ]]; then
     echo "❌ ERROR: Script not found or not executable: $script_path"
@@ -28,16 +19,7 @@ container_runtime_build() {
 }
 
 container_runtime_entrypoint() {
-  if [[ -z "${CONTAINER_TOOLS:-}" ]]; then
-      echo "❌ ERROR: CONTAINER_TOOLS environment variable is not set"
-      echo ""
-      echo "This variable should be set in your Dockerfile:"
-      echo "  ENV CONTAINER_TOOLS=/opt/container-tools"
-      echo ""
-      return 1
-  fi
-
-  local script_path="${CONTAINER_TOOLS}/container-runtime.sh"
+  local script_path="./container-runtime.sh"
 
   if [[ ! -x "$script_path" ]]; then
     echo "❌ ERROR: Script not found or not executable: $script_path"
