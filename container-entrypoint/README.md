@@ -46,10 +46,10 @@ ENV CONTAINER_TOOLS=/opt/container-tools \
 RUN apk add --no-cache bash yq \
     && REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon \
     && fman install --github --repo=deep-space-projects/container-dev-tools --branch=master \
-    && cent build
+    && entrypoint build
 
 # Устанавливаем entrypoint
-ENTRYPOINT ["cent", "start"]
+ENTRYPOINT ["entrypoint", "start"]
 # Простая команда для тестирования
 CMD ["echo", "Hello from Universal Entrypoint!"]
 ```
