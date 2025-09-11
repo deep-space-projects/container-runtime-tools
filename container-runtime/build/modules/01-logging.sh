@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
-# Init Scripts Execution Module
-# Executes user-provided initialization scripts in lexicographic order
+# Logging Setup Module
+# Sets up basic logging environment variables if not already configured
 # ============================================================================
 
 set -euo pipefail
@@ -10,42 +10,59 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${CONTAINER_TOOLS}/core/modules.sh"
 # Загружаем нужную реализацию
-load_module_implementation "$SCRIPT_DIR" "init-scripts"
+load_module_implementation "$SCRIPT_DIR" "logging"
 
 # ============================================================================
 # MODULE FUNCTION
 # ============================================================================
 
 module() {
-    tlog header "INIT SCRIPTS EXECUTION"
+    tlog header "LOGGING SETUP"
 
-    tlog info "Checking for user initialization scripts in: $CONTAINER_ENTRYPOINT_SCRIPTS"
+    tlog info "Configuring basic logging environment for container: $CONTAINER_NAME"
 
     # ========================================================================
-    # 1. CHECK INIT SCRIPTS DIRECTORY
+    # 1. BASIC LOGGING VARIABLES
     # ========================================================================
 
-    tlog step "1" "Checking init scripts directory"
-    if ! check_init_scripts_directory; then
-        tlog error "Init scripts directory check failed"
+    tlog step "1" "Setting up basic logging variables"
+    if ! setup_basic_logging_variables; then
+        tlog error "Basic logging variables setup failed"
         return 1
     fi
 
     # ========================================================================
-    # 2. EXECUTE INIT SCRIPTS
+    # 2. CREATE LOGGING DIRECTORY
     # ========================================================================
-
-    tlog step "2" "Executing init scripts"
-    if ! execute_init_scripts; then
-        tlog error "Init scripts execution failed"
+    tlog step "2" "Setting up log directory"
+    if ! setup_log_directory; then
+        tlog error "Log directory setup failed"
         return 1
     fi
+
+    # ========================================================================
+    # 3. VERIFY LOGGING DIRECTORY
+    # ========================================================================
+
+    tlog step "3" "Verifying tlog directory"
+    if ! verify_log_directory; then
+        tlog error "Log directory verification failed"
+        return 1
+    fi
+
+    # ========================================================================
+    # LOGGING SUMMARY
+    # ========================================================================
+
+    tlog info "Logging setup summary:"
+    tlog info "  tlog directory: $LOG_DIR"
+    tlog info "  tlog level: $LOG_LEVEL"
 
     # ========================================================================
     # COMPLETION
     # ========================================================================
 
-    tlog success "Init scripts execution module completed successfully"
+    tlog success "Logging setup module completed successfully"
     return 0
 }
 

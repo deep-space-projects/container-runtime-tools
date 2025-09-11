@@ -8,20 +8,23 @@ set -euo pipefail
 pre_execution_validation() {
     # Проверяем что целевой пользователь существует
     if ! users exists "$CONTAINER_USER"; then
-        operations handle-quite "validate target user" "User does not exist: $CONTAINER_USER" 1
+        ops handle-quite "validate target user" "User does not exist: $CONTAINER_USER" 1
     fi
 
-    # Получаем информацию о текущем пользователе
-    users get-info $USER
+    local current_user=$(whoami)
+    local current_user_uid=$(users get-uid $current_user)
 
-    tlog info "Current user: $CURRENT_USER (UID: $CURRENT_UID)"
+    # Получаем информацию о текущем пользователе
+    users get-info $current_user
+
+    tlog info "Current user: $current_user (UID: $current_user_uid)"
     tlog info "Target user: $CONTAINER_USER (UID: $CONTAINER_UID)"
 
-    if [[ "$CURRENT_USER" == "$CONTAINER_USER" ]]; then
+    if [[ "$current_user" == "$CONTAINER_USER" ]]; then
         tlog info "Already running as target user"
     elif [[ $EUID -ne 0 ]]; then
         tlog warning "Not running as root - cannot switch users"
-        tlog warning "Will execute command as current user: $CURRENT_USER"
+        tlog warning "Will execute command as current user: $current_user"
     fi
 
     tlog success "Pre-execution validation completed"
@@ -30,7 +33,7 @@ pre_execution_validation() {
 prepare_user_environment_for_exec() {
     # Подготавливаем окружение пользователя
     if ! users prepare-env "$CONTAINER_USER" "true"; then
-        operations handle-quite "prepare user environment" "Failed to prepare environment for: $CONTAINER_USER" 1
+        ops handle-quite "prepare user environment" "Failed to prepare environment for: $CONTAINER_USER" 1
     fi
 
     tlog success "User environment prepared"
@@ -48,9 +51,7 @@ execute_final_command() {
     # Эта функция делает exec, поэтому мы сюда не вернемся
     exec_final_command "$CONTAINER_USER" "$FINAL_COMMAND"
 
-    # Если мы дошли до сюда - что-то пошло не так
-    tlog error "Failed to execute final command - this should not happen"
-    exit 1
+    return 0
 }
 
 # Выполнение финальной команды под правильным пользователем
@@ -89,7 +90,7 @@ exec_final_command() {
     users get-info "$target_user"
 
     # Если уже нужный пользователь - выполняем напрямую
-    if [[ "$CURRENT_USER" == "$target_user" ]] || [[ $EUID -ne 0 ]]; then
+    if [[ "$(whoami)" == "$target_user" ]] || [[ $EUID -ne 0 ]]; then
         tlog info "Executing command as current user"
         exec bash -c "$command_to_exec"
     fi
@@ -100,6 +101,6 @@ exec_final_command() {
     users switch "$target_user" "$command_to_exec"
 
     # Если мы дошли сюда - что-то пошло не так
-    tlog error "Failed to execute final command"
-    return 1
+    tlog warning "Final command is not a process"
+    return 0
 }

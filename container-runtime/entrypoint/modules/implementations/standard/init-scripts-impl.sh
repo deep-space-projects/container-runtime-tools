@@ -21,10 +21,10 @@ execute_init_scripts() {
 
     if ! scripts exec-all \
             --path="$CONTAINER_ENTRYPOINT_SCRIPTS" \
-            --error-policy="$EXEC_ERROR_POLICY"
+            --error-policy="$EXEC_ERROR_POLICY" \
             --timeout=0 \
             --pattern="*.sh"; then
-        operations handle-quite "execute init scripts" "Directory: $CONTAINER_ENTRYPOINT_SCRIPTS" 1
+        ops handle-quite "execute init scripts" "Directory: $CONTAINER_ENTRYPOINT_SCRIPTS" 1
     else
         tlog success "All init scripts executed successfully"
     fi

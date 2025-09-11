@@ -38,9 +38,8 @@ module() {
 
     tlog step "2" "Executing dependencies scripts with total timeout"
     if ! execute_dependencies_scripts; then
-        local exit_code=$?
         tlog error "Dependencies scripts execution failed"
-        return $exit_code
+        return 1
     fi
 
     # ========================================================================
@@ -56,5 +55,7 @@ module() {
 # ============================================================================
 
 # Запускаем модуль и завершаем скрипт с его кодом
-module "$@"
-exit $?
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  module "$@"
+  exit $?
+fi

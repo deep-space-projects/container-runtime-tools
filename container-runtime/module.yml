@@ -1,0 +1,26 @@
+version: 1.0.0
+
+metadata:
+  name: "crun"
+  description: "Container runtime management"
+  version: "1.0.0"
+  author: "dev-tools"
+
+specification:
+  module:
+    commands:
+      # ---------------
+      # Group management
+      - name: "build"
+        function: "container_runtime_build"
+        description: "Build container environment"
+        usage: "crun build"
+
+      # Group management
+      - name: "start"
+        function: "container_runtime_entrypoint"
+        description: "Run container entrypoint"
+        usage: "crun start <cmd arguments>"
+
+    files:
+      - "container-runtime-lib.sh"

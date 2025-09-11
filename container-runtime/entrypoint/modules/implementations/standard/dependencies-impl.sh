@@ -31,15 +31,15 @@ execute_dependencies_scripts() {
 
     tlog info "Found $scripts_count dependency scripts, executing under total timeout: ${DEPENDENCY_TIMEOUT}s..."
 
-    commands exec \
+    scripts exec-all \
+            --path="$CONTAINER_ENTRYPOINT_DEPENDENCIES" \
+            --error-policy="$EXEC_ERROR_POLICY" \
             --timeout="$DEPENDENCY_TIMEOUT" \
-            --description="All dependency scripts" \
-            execute_scripts_in_directory "$CONTAINER_ENTRYPOINT_DEPENDENCIES" "$EXEC_ERROR_POLICY" 0 "*.sh"
+            --pattern="*.sh"
     local timeout_exit_code=$?
 
-
     if [[ $timeout_exit_code -ne 0 ]]; then
-        operations handle-quite "execute dependencies scripts with timeout" "Directory: $CONTAINER_ENTRYPOINT_DEPENDENCIES, Total timeout: ${DEPENDENCY_TIMEOUT}s" $timeout_exit_code
+        ops handle-quite "execute dependencies scripts with timeout" "Directory: $CONTAINER_ENTRYPOINT_DEPENDENCIES, Total timeout: ${DEPENDENCY_TIMEOUT}s" $timeout_exit_code
         return $?
     else
         tlog success "All dependency scripts executed successfully within timeout"
