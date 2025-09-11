@@ -6,8 +6,10 @@
 
 set -euo pipefail
 
+local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 container_runtime_build() {
-  local script_path="./bin/container-runtime.sh"
+  local script_path="$script_dir/bin/container-runtime.sh"
 
   if [[ ! -x "$script_path" ]]; then
     echo "❌ ERROR: Script not found or not executable: $script_path"
@@ -19,7 +21,7 @@ container_runtime_build() {
 }
 
 container_runtime_entrypoint() {
-  local script_path="./bin/container-runtime.sh"
+  local script_path="$script_dir/bin/container-runtime.sh"
 
   if [[ ! -x "$script_path" ]]; then
     echo "❌ ERROR: Script not found or not executable: $script_path"
