@@ -1,7 +1,7 @@
 version: 1.0.0
 
 metadata:
-  name: "cent"
+  name: "entrypoint"
   description: "Container entrypoint functions"
   version: "1.0.0"
   author: "dev-tools"
@@ -14,13 +14,13 @@ specification:
       - name: "build"
         function: "container_entrypoint_build"
         description: "Build container build"
-        usage: "cent build"
+        usage: "entrypoint build"
 
       # Group management
       - name: "start"
         function: "container_entrypoint_start"
         description: "Run container entrypoint"
-        usage: "cent start <cmd arguments>"
+        usage: "entrypoint start <cmd arguments>"
 
     files:
       - "container-entrypoint-lib.sh"
