@@ -2,7 +2,7 @@ version: 1.0.0
 
 metadata:
   name: "cent"
-  description: "Container runtime management"
+  description: "Container entrypoint functions"
   version: "1.0.0"
   author: "dev-tools"
 
