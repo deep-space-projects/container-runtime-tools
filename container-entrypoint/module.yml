@@ -1,7 +1,7 @@
 version: 1.0.0
 
 metadata:
-  name: "crun"
+  name: "cent"
   description: "Container runtime management"
   version: "1.0.0"
   author: "dev-tools"
@@ -12,18 +12,18 @@ specification:
       # ---------------
       # Group management
       - name: "build"
-        function: "container_runtime_build"
-        description: "Build container environment"
-        usage: "crun build"
+        function: "container_entrypoint_build"
+        description: "Build container build"
+        usage: "cent build"
 
       # Group management
       - name: "start"
-        function: "container_runtime_entrypoint"
+        function: "container_entrypoint_start"
         description: "Run container entrypoint"
-        usage: "crun start <cmd arguments>"
+        usage: "cent start <cmd arguments>"
 
     files:
-      - "container-runtime-lib.sh"
+      - "container-entrypoint-lib.sh"
 
     binaries:
       - "bin"

@@ -65,15 +65,15 @@ ENV CONTAINER_TEMP=/tmp/${CONTAINER_NAME} \
     CONTAINER_WORKING_DIRS="/${CONTAINER_USER}/some-working-dir,/opt/some/wotkind/directory"
 
 # Копируем container-tools (теперь context = roles/docker-base/)
-COPY container-runtime/ ${CONTAINER_TOOLS}/
+COPY bin/ ${CONTAINER_TOOLS}/
 # Копируем тестовые скрипты во временную директорию
 COPY tests/scripts/ /tmp/${CONTAINER_NAME}
 
 # Настраиваем пользователя и права
 RUN apk add yq
 RUN REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon
-RUN chmod +x /opt/container-tools/container-runtime.sh
-RUN /opt/container-tools/container-runtime.sh build
+RUN chmod +x /opt/container-tools/container-entrypoint.sh
+RUN /opt/container-tools/container-entrypoint.sh build
 
 # Устанавливаем entrypoint
 ENTRYPOINT ["/opt/container-tools/container-runtime.sh", "entrypoint"]
