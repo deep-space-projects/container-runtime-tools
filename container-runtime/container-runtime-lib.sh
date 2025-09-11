@@ -7,6 +7,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export CONTAINER_TOOLS=$SCRIPT_DIR/bin
 
 container_runtime_build() {
   local script_path="$SCRIPT_DIR/bin/container-runtime.sh"
