@@ -31,6 +31,22 @@ services:
       - EXEC_MODE=0  # STANDARD
     profiles: ["standard"]
 
+  # Минимальный тест в стандартном режиме
+  test-crun:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.wget
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-abc123}
+        - GIT_BRANCH=${GIT_BRANCH:-main}
+        - BUILD_NUMBER=${BUILD_NUMBER:-local}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+    profiles: ["crun"]
+
   # Полный тест со всеми скриптами
   test-full:
     build:

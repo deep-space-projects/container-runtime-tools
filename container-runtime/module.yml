@@ -24,3 +24,6 @@ specification:
 
     files:
       - "container-runtime-lib.sh"
+
+    binaries:
+      - "bin"
