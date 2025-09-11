@@ -19,28 +19,39 @@ Universal Docker Entrypoint — это готовое решение для ин
 ### 1. Добавьте в Dockerfile
 
 ```dockerfile
+# Минимальный тест Universal Docker Entrypoint
 FROM alpine:3.19
 
-# Установите bash (обязательно)
-RUN apk add --no-cache bash
+# Устанавливаем bash (обязательно!)
 
-# Настройте переменные
+# Используем текущего пользователя для тестов
+ARG CURRENT_USER_ID=1000
+ARG CURRENT_GROUP_ID=10000
+
+USER root
+
+# Настраиваем базовые переменные окружения
 ENV CONTAINER_TOOLS=/opt/container-tools \
-    CONTAINER_USER=appuser \
-    CONTAINER_UID=1000 \
-    CONTAINER_GID=1000 \
-    CONTAINER_NAME=my-app
+    CONTAINER_NAME=test-minimal \
+    CONTAINER_USER=testuser \
+    CONTAINER_UID=${CURRENT_USER_ID} \
+    CONTAINER_GID=${CURRENT_GROUP_ID} \
+    CONTAINER_GROUP=testgroup \
+    CONTAINER_TEMP=/tmp/test-minimal \
+    CONTAINER_ENTRYPOINT_SCRIPTS=/tmp/test-minimal/init \
+    CONTAINER_ENTRYPOINT_CONFIGS=/tmp/test-minimal/config \
+    CONTAINER_ENTRYPOINT_DEPENDENCIES=/tmp/test-minimal/dependencies
 
-# Скопируйте container-tools
-COPY container-tools/ ${CONTAINER_TOOLS}/
+# Настраиваем пользователя и права
+RUN apk add --no-cache bash yq \
+    && REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon \
+    && fman install --github --repo=deep-space-projects/container-dev-tools --branch=master \
+    && cent build
 
-# Настройте пользователя
-RUN ${CONTAINER_TOOLS}/build/setup-container-user.sh \
-    ${CONTAINER_USER} ${CONTAINER_UID} appgroup ${CONTAINER_GID}
-
-# Установите entrypoint
-ENTRYPOINT ["bash", "/opt/container-tools/entrypoint/universal-entrypoint.sh"]
-CMD ["my-application"]
+# Устанавливаем entrypoint
+ENTRYPOINT ["cent", "start"]
+# Простая команда для тестирования
+CMD ["echo", "Hello from Universal Entrypoint!"]
 ```
 
 

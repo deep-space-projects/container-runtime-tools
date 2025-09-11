@@ -32,7 +32,7 @@ services:
     profiles: ["standard"]
 
   # Минимальный тест в стандартном режиме
-  test-crun:
+  test-cent:
     build:
       context: ../../
       dockerfile: tests/docker/Dockerfile.wget
@@ -45,7 +45,7 @@ services:
         - BUILD_NUMBER=${BUILD_NUMBER:-local}
     environment:
       - EXEC_MODE=0  # STANDARD
-    profiles: ["crun"]
+    profiles: ["cent"]
 
   # Полный тест со всеми скриптами
   test-full:
