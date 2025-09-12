@@ -25,6 +25,8 @@ DEFAULT_RESTRICTED_DIRS=(
     "/var/spool"
 )
 
+DEFAULT_EXCEPTIONAL_DIRS=()
+
 # Показать политику ограничений
 show_restrictions_policy() {
     tlog info "Restricted directories policy:"
@@ -57,6 +59,28 @@ get_restricted_directories() {
     printf '%s\n' "${normalized_dirs[@]}"
 }
 
+# Получить список запрещенных директорий
+get_exceptional_directories() {
+    local exceptional_dirs=()
+
+    if [[ -n "${CONTAINER_WORKING_DIRS_EXCEPTIONS:-}" ]]; then
+        tlog debug "Using custom exceptional directories: $CONTAINER_WORKING_DIRS_EXCEPTIONS"
+        IFS=',' read -ra exceptional_dirs <<< "$CONTAINER_WORKING_DIRS_EXCEPTIONS"
+    else
+        tlog debug "Using default exceptional directories"
+        exceptional_dirs=("${DEFAULT_EXCEPTIONAL_DIRS[@]}")
+    fi
+
+    # Нормализуем пути (убираем trailing slash)
+    local normalized_dirs=()
+    for dir in "${exceptional_dirs[@]}"; do
+        dir="${dir%/}"  # Remove trailing slash
+        [[ -n "$dir" ]] && normalized_dirs+=("$dir")
+    done
+
+    printf '%s\n' "${normalized_dirs[@]}"
+}
+
 # Проверить, разрешена ли директория для модификации
 is_directory_allowed() {
     local target_dir="$1"
@@ -65,6 +89,17 @@ is_directory_allowed() {
     # Нормализуем целевой путь
     target_dir="${target_dir%/}"
     [[ "$target_dir" == "" ]] && target_dir="/"
+
+    # Получаем список исключенных из запрета директорий
+    mapfile -t exception_dirs < <(get_exceptional_directories)
+
+    # Проверяем, не находится ли директория в списке исключений
+    for exception in "${exception_dirs[@]}"; do
+        if [[ -n "$exception" && ("$target_dir" == "$exception" || "$target_dir" == "$exception"/*) ]]; then
+            tlog debug "Directory '$target_dir' is in exception list '$exception', skipping restriction check"
+            return 0
+        fi
+    done
 
     # Получаем список запрещенных директорий
     mapfile -t restricted_dirs < <(get_restricted_directories)
