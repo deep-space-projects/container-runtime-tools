@@ -134,7 +134,6 @@ change_directory_ownership() {
     # Меняем владельца БЕЗ рекурсии (-R не используем)
     if chown "$CONTAINER_UID:$CONTAINER_GID" "$volume_dir"; then
         tlog debug "✓ Ownership changed: $volume_dir ($current_owner → $CONTAINER_USER:$CONTAINER_GROUP)"
-        return 0
     else
         tlog error "✗ Failed to change ownership: $volume_dir"
         return 1
@@ -142,12 +141,12 @@ change_directory_ownership() {
 
     if chmod 750 "$volume_dir"; then
         tlog debug "✓ Permissions changed to 750: $volume_dir"
-        return 0
     else
         tlog error "✗ Failed to change permissions: $volume_dir"
         return 1
     fi
 
+    return 0
 }
 
 change_volumes_ownership() {
