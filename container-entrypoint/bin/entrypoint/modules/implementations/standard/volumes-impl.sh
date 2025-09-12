@@ -139,6 +139,15 @@ change_directory_ownership() {
         tlog error "✗ Failed to change ownership: $volume_dir"
         return 1
     fi
+
+    if chmod 750 "$volume_dir"; then
+        tlog debug "✓ Permissions changed to 750: $volume_dir"
+        return 0
+    else
+        tlog error "✗ Failed to change permissions: $volume_dir"
+        return 1
+    fi
+
 }
 
 change_volumes_ownership() {
