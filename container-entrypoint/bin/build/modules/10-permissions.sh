@@ -88,28 +88,6 @@ module() {
     fi
 
     # ========================================================================
-    # 6. PERMISSIONS VERIFICATION
-    # ========================================================================
-
-    tlog step "6" "Verifying permissions"
-    if ! verify_permissions; then
-        tlog error "Permissions verification failed"
-        return 1
-    fi
-
-    # ========================================================================
-    # PERMISSIONS SUMMARY
-    # ========================================================================
-
-    tlog info "Permissions setup summary:"
-    tlog info "  Container temp: $CONTAINER_TEMP (700/600, owner: $CONTAINER_USER)"
-    tlog info "  tlog directory: /var/log/$CONTAINER_NAME (700/600, owner: $CONTAINER_USER)"
-    tlog info "  Init scripts: $CONTAINER_ENTRYPOINT_SCRIPTS (700/700 + executable, owner: $CONTAINER_USER)"
-    tlog info "  Configs: $CONTAINER_ENTRYPOINT_CONFIGS (700/600, owner: $CONTAINER_USER)"
-    tlog info "  Dependencies: $CONTAINER_ENTRYPOINT_DEPENDENCIES (700/700 + executable, owner: $CONTAINER_USER)"
-    tlog info "  Container tools: $CONTAINER_TOOLS (750/750 + executable, owner: $CONTAINER_USER)"
-
-    # ========================================================================
     # COMPLETION
     # ========================================================================
 
