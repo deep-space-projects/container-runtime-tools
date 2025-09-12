@@ -109,7 +109,7 @@ setup_container_tools() {
 verify_permissions() {
     # Проверяем что критически важные директории имеют правильного владельца
     critical_dirs=(
-        "/var/log/$CONTAINER_NAME"
+        "$LOG_DIR"
         "$CONTAINER_TOOLS"
         "$CONTAINER_TEMP"
     )

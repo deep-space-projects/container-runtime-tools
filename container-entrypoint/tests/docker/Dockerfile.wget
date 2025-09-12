@@ -24,7 +24,7 @@ ENV CONTAINER_TOOLS=/opt/container-tools \
 # Настраиваем пользователя и права
 RUN apk add --no-cache bash yq \
     && REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon \
-    && fman install --github --repo=deep-space-projects/container-dev-tools --branch=master \
+    && fman install --github --repo=deep-space-projects/container-runtime-tools --branch=main \
     && entrypoint build
 
 # Устанавливаем entrypoint
