@@ -60,6 +60,16 @@ module() {
     fi
 
     # ========================================================================
+    # 4. IMPORT RUNTIME ENV FILES
+    # ========================================================================
+
+    tlog info "Importing runtime env files..."
+    if ! import_runtime_environment_files; then
+        tlog error "Runtime information import failed"
+        return 1
+    fi
+
+    # ========================================================================
     # COMPLETION
     # ========================================================================
 

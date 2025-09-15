@@ -8,7 +8,7 @@ set -euo pipefail
 detect_operating_system() {
     OS_TYPE=$(os detect)
     OS_FAMILY=$(os family)
-    IS_MINIMAL=$(os is-mini && echo "true" || echo "false")
+    IS_MINIMAL=$(os is-mini && tlog info "true" || tlog info "false")
 
     tlog info "Operating System: $OS_TYPE"
     tlog info "OS Family: $OS_FAMILY"
@@ -94,4 +94,111 @@ export_runtime_information() {
     tlog info "  Working directory: $CURRENT_WORKING_DIR"
     tlog info "  Current user: $(whoami) (UID: $(users get-uid $(whoami))"
     tlog info "  Target user: $CONTAINER_USER (UID: $CONTAINER_UID)"
+}
+
+import_runtime_environment_files() {
+    local env_dir="${CONTAINER_ENVIRONMENT_VARS}"
+
+    if [[ -z ${env_dir} ]]; then
+        tlog info "Container environment var directory not specified, skip import"
+        return 0
+    fi
+
+    # Создаем или очищаем system profile файл
+    tlog info "Создание system profile файла..."
+    tee /etc/profile.d/custom_vars.sh > /dev/null << EOF
+# Автоматически сгенерировано из .env файлов
+# Дата создания: $(date)
+# Источник: $env_dir
+
+EOF
+    chmod 644 /etc/profile.d/custom_vars.sh
+
+    # Ищем все .env файлы в директории
+    local env_files=()
+    while IFS= read -r -d '' file; do
+        env_files+=("$file")
+    done < <(find "$env_dir" -maxdepth 1 -name "*.env*" -type f -print0)
+
+    # Сортируем файлы для предсказуемого порядка
+    IFS=$'\n' env_files=($(sort <<<"${env_files[*]}"))
+    unset IFS
+
+    if [[ ${#env_files[@]} -eq 0 ]]; then
+        tlog info "Не найдено .env файлов в директории $env_dir"
+        return 0
+    fi
+
+    tlog info "Найдено .env файлов: ${#env_files[@]}"
+
+    # Обрабатываем каждый файл
+    for env_file in "${env_files[@]}"; do
+        tlog info ""
+        tlog info "Обработка файла: $(basename "$env_file")"
+        tlog info "=========================================="
+
+        # Проверяем, что файл читаем
+        if [[ ! -r "$env_file" ]]; then
+            tlog warning "Пропускаем: Нет прав на чтение файла"
+            continue
+        fi
+
+        # Экспортируем в текущую сессию
+        __export_to_current_session "$env_file"
+
+        # Добавляем в system profile
+        __append_to_system_profile "$env_file"
+
+        tlog info "Файл обработан: $(basename "$env_file")"
+    done
+
+    tlog info ""
+    tlog info "=========================================="
+    tlog info "Все .env файлы обработаны!"
+    tlog info "System profile: /etc/profile.d/custom_vars.sh"
+    tlog info "Переменные экспортированы в текущую сессию"
+
+}
+
+# Функция для экспорта в текущий процесс
+__export_to_current_session() {
+    local env_file="$1"
+    tlog info "Экспорт переменных из $env_file в текущую сессию..."
+
+    while read -r line; do
+        # Пропускаем комментарии и пустые строки
+        [[ $line =~ ^# ]] || [[ -z $line ]] && continue
+
+        # Экспортируем переменную
+        if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+            export "$line"
+            tlog info "✓ $line"
+        else
+            tlog info "✗ Неверный формат: $line"
+        fi
+    done < "$env_file"
+}
+
+# Функция для добавления в system profile
+__append_to_system_profile() {
+    local env_file="$1"
+    local profile_file="/etc/profile.d/custom_vars.sh"
+
+    tlog info "Добавление переменных из $env_file в $profile_file..."
+
+    # Добавляем заголовок с именем файла
+    echo "# --- Переменные из $(basename "$env_file") ---" | tee -a "$profile_file" > /dev/null
+
+    # Добавляем переменные
+    grep -v '^#' "$env_file" | grep -v '^$' | while read -r line; do
+        if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+            tlog info "export $line" | tee -a "$profile_file" > /dev/null
+            tlog info "✓ Добавлено: $line"
+        else
+            tlog warning "✗ Пропущено (неверный формат): $line"
+        fi
+    done
+
+    # Добавляем пустую строку для читаемости
+    echo | tee -a "$profile_file" > /dev/null
 }
