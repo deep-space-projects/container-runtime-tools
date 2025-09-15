@@ -60,7 +60,7 @@ export_runtime_information() {
 }
 
 import_runtime_environment_files() {
-    tlog info "[DRY RUN] Would check directory: $CONTAINER_ENVIRONMENT_VARS"
+    tlog info "[DRY RUN] Would check directory: $CONTAINER_ENTRYPOINT_ENVIRONMENT_VARS"
     tlog info "[DRY RUN] Would export all .env files in lexicographic order"
     tlog info "[DRY RUN] Would append system file /etc/profile.d/custom_vars.sh with all .env files in lexicographic order"
 }

@@ -97,7 +97,7 @@ export_runtime_information() {
 }
 
 import_runtime_environment_files() {
-    local env_dir="${CONTAINER_ENVIRONMENT_VARS}"
+    local env_dir="${CONTAINER_ENTRYPOINT_ENVIRONMENT_VARS}"
 
     if [[ -z ${env_dir} ]]; then
         tlog info "Container environment var directory not specified, skip import"
