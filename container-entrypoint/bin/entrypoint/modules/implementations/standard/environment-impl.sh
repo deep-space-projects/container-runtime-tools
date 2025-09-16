@@ -143,11 +143,11 @@ EOF
             continue
         fi
 
-        # Экспортируем в текущую сессию
-        __export_to_current_session "$env_file"
-
         # Добавляем в system profile
         __append_to_system_profile "$env_file"
+
+        # Экспортируем в текущую сессию
+        __export_to_current_session "$env_file"
 
         tlog info "Файл обработан: $(basename "$env_file")"
     done
