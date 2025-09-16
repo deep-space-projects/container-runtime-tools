@@ -201,8 +201,8 @@ __append_to_system_profile() {
             var_name="${line%%=*}"    # Всё до первого знака =
 
             if ! envs check $var_name; then
-            tlog info "export $line" | tee -a "$profile_file" > /dev/null
-            tlog info "✓ Добавлено: $line"
+              echo "export $line" | tee -a "$profile_file" > /dev/null
+              tlog info "✓ Добавлено: $line"
             else
               tlog warning "⚠ Переменная уже объявлена: $var_name=${!var_name}, переменная проигнорирована"
             fi
