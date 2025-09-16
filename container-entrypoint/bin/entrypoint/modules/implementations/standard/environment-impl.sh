@@ -171,8 +171,14 @@ __export_to_current_session() {
 
         # Экспортируем переменную
         if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
-            export "$line"
-            tlog info "✓ $line"
+            var_name="${line%%=*}"    # Всё до первого знака =
+
+            if ! envs check $var_name; then
+              export "$line"
+              tlog info "✓ $line"
+            else
+              tlog warning "⚠ Переменная уже объявлена: $var_name=${!var_name}, переменная проигнорирована"
+            fi
         else
             tlog info "✗ Неверный формат: $line"
         fi
@@ -192,8 +198,14 @@ __append_to_system_profile() {
     # Добавляем переменные
     grep -v '^#' "$env_file" | grep -v '^$' | while read -r line; do
         if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+            var_name="${line%%=*}"    # Всё до первого знака =
+
+            if ! envs check $var_name; then
             tlog info "export $line" | tee -a "$profile_file" > /dev/null
             tlog info "✓ Добавлено: $line"
+            else
+              tlog warning "⚠ Переменная уже объявлена: $var_name=${!var_name}, переменная проигнорирована"
+            fi
         else
             tlog warning "✗ Пропущено (неверный формат): $line"
         fi
