@@ -98,7 +98,11 @@ exec_final_command() {
     # Переключаемся на пользователя и выполняем команду (используем platform.sh)
     tlog success "Switching to user '$target_user' and executing command..."
 
-    users switch "$target_user" "$command_to_exec"
+    if envs exists ENTRYPOINT_RUN_COMMAND_AS_ROOT && [[ $ENTRYPOINT_RUN_COMMAND_AS_ROOT == "true" ]]; then
+        exec bash -c "$command_to_exec"
+    else
+        users switch "$target_user" "$command_to_exec"
+    fi
 
     # Если мы дошли сюда - что-то пошло не так
     tlog warning "Final command is not a process"
