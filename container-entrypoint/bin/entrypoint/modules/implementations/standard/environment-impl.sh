@@ -172,7 +172,7 @@ __export_to_current_session() {
         # Экспортируем переменную
         if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
             var_name="${line%%=*}"
-            var_value=$(echo "${line#*=}")
+            var_value=$(echo "${line#*=}" | envsubst)
 
             if ! envs check $var_name; then
               export "$var_name=$var_value"
@@ -200,7 +200,7 @@ __append_to_system_profile() {
     grep -v '^#' "$env_file" | grep -v '^$' | while read -r line; do
         if [[ $line =~ ^[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
             var_name="${line%%=*}"    # Всё до первого знака =
-            var_value=$(echo "${line#*=}")
+            var_value=$(echo "${line#*=}" | envsubst)
 
             if ! envs check $var_name; then
               echo "export $var_name=$var_value" | tee -a "$profile_file" > /dev/null
