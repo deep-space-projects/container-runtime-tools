@@ -8,7 +8,7 @@ set -euo pipefail
 setup_basic_logging_variables() {
     # Устанавливаем базовые переменные логирования только если они не установлены
     if [[ -z "${LOG_DIR:-}" ]]; then
-        export LOG_DIR="/var/log/$CONTAINER_NAME"
+        export LOG_DIR="$LOG_HOME/$CONTAINER_NAME"
         tlog info "Set LOG_DIR: $LOG_DIR"
     else
         tlog info "LOG_DIR already set: $LOG_DIR"
