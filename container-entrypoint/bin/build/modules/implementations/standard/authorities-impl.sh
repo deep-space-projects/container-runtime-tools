@@ -47,7 +47,6 @@ setup_container_user() {
         # если был задан предыдущий user контейнера, тогда мы делаем replace
         users replace --update-mode=full $IMAGE_USER $CONTAINER_USER $CONTAINER_UID $CONTAINER_GROUP
         return $?
-
     fi
 }
 
