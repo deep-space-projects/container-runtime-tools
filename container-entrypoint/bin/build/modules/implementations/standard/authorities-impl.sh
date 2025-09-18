@@ -38,8 +38,16 @@ setup_container_group() {
 
 setup_container_user() {
     tlog info "Setting up container user: $CONTAINER_USER ($CONTAINER_UID:$CONTAINER_GID)"
-    users create --on-exist=update --update-mode=full $CONTAINER_USER $CONTAINER_UID $CONTAINER_GROUP
-    return $?
+
+    if [[ -z $IMAGE_USER ]]; then
+        # если был задан предыдущий user контейнера, тогда мы делаем replace
+        users replace --update-mode=full $IMAGE_USER $CONTAINER_USER $CONTAINER_UID $CONTAINER_GROUP
+        return $?
+    else
+        # иначе мы создаем нового user контейнера и если он совпадает с существующим, то делаем replace
+        users create --on-exist=update --update-mode=full $CONTAINER_USER $CONTAINER_UID $CONTAINER_GROUP
+        return $?
+    fi
 }
 
 verify_authorities_setup() {
