@@ -39,7 +39,7 @@ setup_container_group() {
 setup_container_user() {
     tlog info "Setting up container user: $CONTAINER_USER ($CONTAINER_UID:$CONTAINER_GID)"
 
-    if [[ -z $IMAGE_USER ]]; then
+    if [[ -z ${IMAGE_USER:+x} ]]; then
         # если был задан предыдущий user контейнера, тогда мы делаем replace
         users replace --update-mode=full $IMAGE_USER $CONTAINER_USER $CONTAINER_UID $CONTAINER_GROUP
         return $?
