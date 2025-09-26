@@ -1,0 +1,82 @@
+# Полный тест Universal Docker Entrypoint с init скриптами
+FROM alpine:3.19
+
+# Устанавливаем bash и дополнительные утилиты для тестирования
+RUN apk add --no-cache bash curl netcat-openbsd
+
+# Используем текущего пользователя для тестов
+ARG CURRENT_USER_ID=1000
+ARG CURRENT_GROUP_ID=10000
+ARG IMAGE_NAME=universal-app
+ARG IMAGE_VERSION=1.0.0
+ARG BUILD_DATE
+ARG GIT_COMMIT
+
+# Метаданные образа по стандарту OCI
+LABEL org.opencontainers.image.title="${IMAGE_NAME}" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.description="Universal Docker Entrypoint - Full Test with Init Scripts" \
+      org.opencontainers.image.authors="Deep Space Team <team@deep-space.dev>" \
+      org.opencontainers.image.url="https://github.com/deep-space/universal-entrypoint" \
+      org.opencontainers.image.documentation="https://docs.deep-space.dev/universal-entrypoint" \
+      org.opencontainers.image.source="https://github.com/deep-space/universal-entrypoint" \
+      org.opencontainers.image.vendor="Deep Space" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.ref.name="${IMAGE_NAME}:${IMAGE_VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.name="${IMAGE_NAME}" \
+      org.label-schema.version="${IMAGE_VERSION}" \
+      org.label-schema.description="Universal Docker Entrypoint - Cross-platform modular architecture" \
+      org.label-schema.url="https://github.com/deep-space/universal-entrypoint" \
+      org.label-schema.vcs-url="https://github.com/deep-space/universal-entrypoint" \
+      org.label-schema.vcs-ref="${GIT_COMMIT}" \
+      org.label-schema.vendor="Deep Space" \
+      org.label-schema.build-date="${BUILD_DATE}" \
+      \
+      maintainer="Deep Space Team <team@deep-space.dev>" \
+      git.branch="${GIT_BRANCH}" \
+      build.number="${BUILD_NUMBER}" \
+      test.type="full" \
+      entrypoint.version="1.0.0"
+
+
+# Константы (простые значения)
+ENV CONTAINER_TOOLS=/opt/container-tools \
+    CONTAINER_NUMBER=0 \
+    CONTAINER_USER=appuser \
+    CONTAINER_UID=${CURRENT_USER_ID} \
+    CONTAINER_GID=${CURRENT_GROUP_ID} \
+    CONTAINER_GROUP=appgroup \
+    DEPENDENCY_TIMEOUT=30 \
+    WAIT_TIME=3 \
+    LOG_LEVEL=DEBUG
+
+# Составные переменные (зависят от других переменных)
+ENV CONTAINER_NAME=${IMAGE_NAME}-${CONTAINER_NUMBER}
+
+# Пути (зависят от CONTAINER_NAME)
+ENV CONTAINER_TEMP=/tmp/${CONTAINER_NAME} \
+    CONTAINER_ENTRYPOINT_SCRIPTS=/tmp/${CONTAINER_NAME}/init \
+    CONTAINER_ENTRYPOINT_CONFIGS=/tmp/${CONTAINER_NAME}/config \
+    CONTAINER_ENTRYPOINT_DEPENDENCIES=/tmp/${CONTAINER_NAME}/dependencies \
+    CONTAINER_WORKING_DIRS="/${CONTAINER_USER}/some-working-dir,/opt/some/wotkind/directory"
+
+# Копируем container-tools (теперь context = roles/docker-base/)
+COPY bin/ ${CONTAINER_TOOLS}/
+# Копируем тестовые скрипты во временную директорию
+COPY tests/scripts/ /tmp/${CONTAINER_NAME}
+
+# Настраиваем пользователя и права
+RUN apk add yq
+RUN REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon
+RUN chmod +x /opt/container-tools/container-entrypoint.sh
+RUN /opt/container-tools/container-entrypoint.sh build
+
+# Устанавливаем entrypoint
+ENTRYPOINT ["/opt/container-tools/container-runtime.sh", "entrypoint"]
+
+# Команда для полного тестирования
+CMD ["sh", "-c", "'echo \"Application started successfully!\" && sleep 5 && echo \"Application finished\"'"]

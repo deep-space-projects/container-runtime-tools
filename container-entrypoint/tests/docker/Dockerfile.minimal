@@ -1,0 +1,38 @@
+# Минимальный тест Universal Docker Entrypoint
+FROM alpine:3.19
+
+# Устанавливаем bash (обязательно!)
+RUN apk add --no-cache bash
+
+# Используем текущего пользователя для тестов
+ARG CURRENT_USER_ID=1000
+ARG CURRENT_GROUP_ID=10000
+
+USER root
+
+# Настраиваем базовые переменные окружения
+ENV CONTAINER_TOOLS=/opt/container-tools \
+    CONTAINER_NAME=test-minimal \
+    CONTAINER_USER=testuser \
+    CONTAINER_UID=${CURRENT_USER_ID} \
+    CONTAINER_GID=${CURRENT_GROUP_ID} \
+    CONTAINER_GROUP=testgroup \
+    CONTAINER_TEMP=/tmp/test-minimal \
+    CONTAINER_ENTRYPOINT_SCRIPTS=/tmp/test-minimal/init \
+    CONTAINER_ENTRYPOINT_CONFIGS=/tmp/test-minimal/config \
+    CONTAINER_ENTRYPOINT_DEPENDENCIES=/tmp/test-minimal/dependencies
+
+# Копируем container-tools (теперь context = roles/docker-base/)
+COPY bin/ ${CONTAINER_TOOLS}/
+
+# Настраиваем пользователя и права
+RUN apk add yq
+RUN REPO="deep-space-projects/shell-dev-tools" BRANCH="main" BUILD_DIR="build" && wget -qO $BRANCH.zip  https://github.com/$REPO/archive/refs/heads/$BRANCH.zip  && unzip -q $BRANCH.zip -d $BUILD_DIR && bash $BUILD_DIR/shell-dev-tools-$BRANCH/functions-manager/bin/build.sh --privileged --daemon && rm -rf $BUILD_DIR && rm -f $BRANCH.zip && fman install --system --daemon
+RUN chmod +x /opt/container-tools/container-entrypoint.sh
+RUN /opt/container-tools/container-entrypoint.sh build
+
+# Устанавливаем entrypoint
+ENTRYPOINT ["/opt/container-tools/container-runtime.sh", "entrypoint"]
+
+# Простая команда для тестирования
+CMD ["echo", "Hello from Universal Entrypoint!"]

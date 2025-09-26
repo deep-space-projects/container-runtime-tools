@@ -1,0 +1,132 @@
+services:
+  # Минимальный тест в DRY_RUN режиме
+  test-dry-run:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.minimal
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-abc123}
+        - GIT_BRANCH=${GIT_BRANCH:-main}
+        - BUILD_NUMBER=${BUILD_NUMBER:-local}
+    environment:
+      - EXEC_MODE=4  # DRY_RUN
+    profiles: ["dry-run"]
+
+  # Минимальный тест в стандартном режиме
+  test-standard:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.minimal
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-abc123}
+        - GIT_BRANCH=${GIT_BRANCH:-main}
+        - BUILD_NUMBER=${BUILD_NUMBER:-local}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+    profiles: ["standard"]
+
+  # Минимальный тест в стандартном режиме
+  test-cent:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.wget
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-abc123}
+        - GIT_BRANCH=${GIT_BRANCH:-main}
+        - BUILD_NUMBER=${BUILD_NUMBER:-local}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+    profiles: ["cent"]
+
+  # Полный тест со всеми скриптами
+  test-full:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.full
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-def456}
+        - GIT_BRANCH=${GIT_BRANCH:-develop}
+        - BUILD_NUMBER=${BUILD_NUMBER:-local}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+      - EXEC_ERROR_POLICY=0  # STRICT
+    profiles: ["full"]
+
+  # Тест только инициализации
+  test-init-only:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.full
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-ghi789}
+        - GIT_BRANCH=${GIT_BRANCH:-feature/init-only}
+        - BUILD_NUMBER=${BUILD_NUMBER:-test-123}
+    environment:
+      - EXEC_MODE=2  # INIT_ONLY
+    profiles: ["init-only"]
+
+  # Тест с пропуском всей инициализации
+  test-skip-all:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.minimal
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-jkl012}
+        - GIT_BRANCH=${GIT_BRANCH:-hotfix/skip-all}
+        - BUILD_NUMBER=${BUILD_NUMBER:-hotfix-456}
+    environment:
+      - EXEC_MODE=1  # SKIP_ALL
+    profiles: ["skip-all"]
+
+  # Тест с SOFT политикой ошибок
+  test-soft-errors:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.full
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-mno345}
+        - GIT_BRANCH=${GIT_BRANCH:-release/v1.0.0}
+        - BUILD_NUMBER=${BUILD_NUMBER:-release-789}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+      - EXEC_ERROR_POLICY=1  # SOFT
+    profiles: ["soft-errors"]
+
+  test-dependency-timeout:
+    build:
+      context: ../../
+      dockerfile: tests/docker/Dockerfile.full
+      args:
+        - CURRENT_USER_ID=${CURRENT_USER_ID:-1000}
+        - CURRENT_GROUP_ID=${CURRENT_GROUP_ID:-10000}
+        - BUILD_DATE=${BUILD_DATE:-2025-01-01T00:00:00Z}
+        - GIT_COMMIT=${GIT_COMMIT:-timeout-test}
+        - GIT_BRANCH=${GIT_BRANCH:-feature/timeout-test}
+        - BUILD_NUMBER=${BUILD_NUMBER:-timeout-123}
+    environment:
+      - EXEC_MODE=0  # STANDARD
+      - EXEC_ERROR_POLICY=0  # STRICT
+      - DEPENDENCY_TIMEOUT=5  # Короткий таймаут для теста
+      - WAIT_TIME=20
+    profiles: ["timeout-test"]
