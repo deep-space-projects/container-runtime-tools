@@ -7,12 +7,20 @@
 set -euo pipefail
 
 run_root_installations() {
+  set +u
   run_scripts_in_directory "$1"
+  run_result=$?
+  set -euo pipefail
+  return $run_result
 }
 
 
 run_user_installations() {
+  set +u
   run_scripts_in_directory "$1"
+  run_result=$?
+  set -euo pipefail
+  return $run_result
 }
 
 run_scripts_in_directory() {
