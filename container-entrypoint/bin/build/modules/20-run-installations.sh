@@ -54,6 +54,7 @@ module() {
 
         # надо в новый контекст перезагрузить функции
         if ! su - "${CONTAINER_USER}" << EOF
+echo "${CONTAINER_TOOLS}/core/modules.sh"
 source "${CONTAINER_TOOLS}/core/modules.sh"
 load_module_implementation "${SCRIPT_DIR}" "run-installations"
 run_user_installations "${USER_INSTALL_DIR}"
