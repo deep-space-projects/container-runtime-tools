@@ -114,6 +114,15 @@ import_runtime_environment_files() {
 EOF
     chmod 644 /etc/profile.d/custom_vars.sh
 
+    for bashrc_file in "${HOME}/.bashrc" "/home/${CONTAINER_USER}/.bashrc"; do
+        cat >> "$bashrc_file" << 'EOF'
+
+# IMPORT CUSTOM USER PROPERTIES
+[[ -s "/etc/profile.d/custom_vars.sh" ]] && source "/etc/profile.d/custom_vars.sh"
+EOF
+    done
+
+
     # Ищем все .env файлы в директории
     local env_files=()
     while IFS= read -r -d '' file; do
