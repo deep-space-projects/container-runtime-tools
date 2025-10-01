@@ -52,7 +52,12 @@ module() {
             return 1
         fi
 
-        if ! su - "${CONTAINER_USER}" -c "$(declare -f run_user_installations); run_user_installations \"${USER_INSTALL_DIR}\""; then
+        # надо в новый контекст перезагрузить функции
+        if ! su - "${CONTAINER_USER}" -c "
+            source '${CONTAINER_TOOLS}/core/modules.sh'
+            load_module_implementation '$SCRIPT_DIR' 'run-installations'
+            run_user_installations '${USER_INSTALL_DIR}'
+        "; then
             tlog error "Run ${CONTAINER_USER} installations failed"
             return 1
         fi
