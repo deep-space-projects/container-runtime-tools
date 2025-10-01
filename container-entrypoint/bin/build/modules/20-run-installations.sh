@@ -53,11 +53,12 @@ module() {
         fi
 
         # надо в новый контекст перезагрузить функции
-        if ! su - "${CONTAINER_USER}" -c "
-            source '${CONTAINER_TOOLS}/core/modules.sh'
-            load_module_implementation '$SCRIPT_DIR' 'run-installations'
-            run_user_installations '${USER_INSTALL_DIR}'
-        "; then
+        if ! su - "${CONTAINER_USER}" << EOF
+source "${CONTAINER_TOOLS}/core/modules.sh"
+load_module_implementation "${SCRIPT_DIR}" "run-installations"
+run_user_installations "${USER_INSTALL_DIR}"
+EOF
+        then
             tlog error "Run ${CONTAINER_USER} installations failed"
             return 1
         fi
