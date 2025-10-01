@@ -54,7 +54,7 @@ run_scripts_in_directory() {
         tlog debug "Executing: $script"
 
         # Выполняем скрипт
-        if ! "$script"; then
+        if ! source "$script"; then
             tlog error "Error: Script '$script' failed with exit code $?"
             return 1
         fi
